@@ -204,10 +204,10 @@ handle_exception:                                                       \
 reset_vector:                                                           \
         INIT_XREG;                                                      \
         RISCV_MULTICORE_DISABLE;                                        \
-        INIT_RNMI;                                                      \
-        INIT_SATP;                                                      \
-        INIT_PMP;                                                       \
-        DELEGATE_NO_TRAPS;                                              \
+        /*INIT_RNMI;*/                                                      \
+        /*INIT_SATP;*/                                                      \
+        /*INIT_PMP;*/                                                       \
+        /*DELEGATE_NO_TRAPS;*/                                              \
         li TESTNUM, 0;                                                  \
         la t0, trap_vector;                                             \
         csrw mtvec, t0;                                                 \
