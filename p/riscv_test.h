@@ -104,21 +104,21 @@
   csrw pmpaddr0, t0;                                                    \
   li t0, PMP_NAPOT | PMP_R | PMP_W | PMP_X;                             \
   csrw pmpcfg0, t0;                                                     \
-  .align 2;                                                             \
+  .align 4;                                                             \
 1:
 
 #define INIT_RNMI                                                       \
   la t0, 1f;                                                            \
   csrw mtvec, t0;                                                       \
   csrwi CSR_MNSTATUS, MNSTATUS_NMIE;                                    \
-  .align 2;                                                             \
+  .align 4;                                                             \
 1:
 
 #define INIT_SATP                                                      \
   la t0, 1f;                                                            \
   csrw mtvec, t0;                                                       \
   csrwi satp, 0;                                                       \
-  .align 2;                                                             \
+  .align 4;                                                             \
 1:
 
 #define DELEGATE_NO_TRAPS                                               \
@@ -127,7 +127,7 @@
   csrw mtvec, t0;                                                       \
   csrwi medeleg, 0;                                                     \
   csrwi mideleg, 0;                                                     \
-  .align 2;                                                             \
+  .align 4;                                                             \
 1:
 
 #define RVTEST_ENABLE_SUPERVISOR                                        \
@@ -167,14 +167,14 @@
 
 #define RVTEST_CODE_BEGIN                                               \
         .section .text.init;                                            \
-        .align  6;                                                      \
+        .align  4;                                                      \
         .weak stvec_handler;                                            \
         .weak mtvec_handler;                                            \
         .globl _start;                                                  \
 _start:                                                                 \
         /* reset vector */                                              \
         j reset_vector;                                                 \
-        .align 2;                                                       \
+        .align 4;                                                       \
 trap_vector:                                                            \
         /* test whether the test came from pass/fail */                 \
         csrr t5, mcause;                                                \
@@ -203,34 +203,34 @@ handle_exception:                                                       \
         j write_tohost;                                                 \
 reset_vector:                                                           \
         INIT_XREG;                                                      \
-        RISCV_MULTICORE_DISABLE;                                        \
-        INIT_RNMI;                                                      \
-        INIT_SATP;                                                      \
-        INIT_PMP;                                                       \
-        DELEGATE_NO_TRAPS;                                              \
+        /*RISCV_MULTICORE_DISABLE;*/                                        \
+        /*INIT_RNMI;*/                                                      \
+        /*INIT_SATP;*/                                                      \
+        /*INIT_PMP;*/                                                       \
+        /*DELEGATE_NO_TRAPS;*/                                              \
         li TESTNUM, 0;                                                  \
-        la t0, trap_vector;                                             \
-        csrw mtvec, t0;                                                 \
+        /*la t0, trap_vector;*/                                             \
+        /*csrw mtvec, t0;*/                                                 \
         CHECK_XLEN;                                                     \
         /* if an stvec_handler is defined, delegate exceptions to it */ \
-        la t0, stvec_handler;                                           \
-        beqz t0, 1f;                                                    \
-        csrw stvec, t0;                                                 \
-        li t0, (1 << CAUSE_LOAD_PAGE_FAULT) |                           \
-               (1 << CAUSE_STORE_PAGE_FAULT) |                          \
-               (1 << CAUSE_FETCH_PAGE_FAULT) |                          \
-               (1 << CAUSE_MISALIGNED_FETCH) |                          \
-               (1 << CAUSE_USER_ECALL) |                                \
-               (1 << CAUSE_BREAKPOINT);                                 \
-        csrw medeleg, t0;                                               \
-1:      csrwi mstatus, 0;                                               \
-        init;                                                           \
-        EXTRA_INIT;                                                     \
-        EXTRA_INIT_TIMER;                                               \
-        la t0, 1f;                                                      \
-        csrw mepc, t0;                                                  \
-        csrr a0, mhartid;                                               \
-        mret;                                                           \
+        /*la t0, stvec_handler;*/                                           \
+        /*beqz t0, 1f;*/                                                    \
+        /*csrw stvec, t0;*/                                                 \
+        /*li t0, (1 << CAUSE_LOAD_PAGE_FAULT) |*/                           \
+        /*       (1 << CAUSE_STORE_PAGE_FAULT) |*/                          \
+        /*       (1 << CAUSE_FETCH_PAGE_FAULT) |*/                          \
+        /*       (1 << CAUSE_MISALIGNED_FETCH) |*/                          \
+        /*       (1 << CAUSE_USER_ECALL) |*/                                \
+        /*       (1 << CAUSE_BREAKPOINT);*/                                 \
+        /*csrw medeleg, t0;*/                                               \
+1:      /*csrwi mstatus, 0;*/                                               \
+        /*init;*/                                                           \
+        /*EXTRA_INIT;*/                                                     \
+        /*EXTRA_INIT_TIMER;*/                                               \
+        /*la t0, 1f;*/                                                      \
+        /*csrw mepc, t0;*/                                                  \
+        /*csrr a0, mhartid;*/                                               \
+        /*mret;*/                                                           \
 1:
 
 //-----------------------------------------------------------------------
@@ -245,21 +245,25 @@ reset_vector:                                                           \
 //-----------------------------------------------------------------------
 
 #define RVTEST_PASS                                                     \
-        fence;                                                          \
-        li TESTNUM, 1;                                                  \
-        li a7, 93;                                                      \
-        li a0, 0;                                                       \
-        ecall
+        /*li TESTNUM, 1;*/                                                  \
+        /*li a7, 93;*/                                                      \
+        /*li a0, 0;*/                                                       \
+        /*ecall*/ \
+        li a0, 1; \
+1:      j 1b
+
 
 #define TESTNUM gp
 #define RVTEST_FAIL                                                     \
-        fence;                                                          \
-1:      beqz TESTNUM, 1b;                                               \
-        sll TESTNUM, TESTNUM, 1;                                        \
-        or TESTNUM, TESTNUM, 1;                                         \
-        li a7, 93;                                                      \
-        addi a0, TESTNUM, 0;                                            \
-        ecall
+        /*fence;*/                                                          \
+/*1:      beqz TESTNUM, 1b;*/                                               \
+        /*sll TESTNUM, TESTNUM, 1;*/                                        \
+        /*or TESTNUM, TESTNUM, 1;  */                                       \
+        /*li a7, 93;*/                                                      \
+        /*addi a0, TESTNUM, 0;*/                                            \
+        /*ecall*/ \
+        li a0, 0; \
+1:      j 1b \
 
 //-----------------------------------------------------------------------
 // Data Section Macro
@@ -270,8 +274,8 @@ reset_vector:                                                           \
 #define RVTEST_DATA_BEGIN                                               \
         EXTRA_DATA                                                      \
         .pushsection .tohost,"aw",@progbits;                            \
-        .align 6; .global tohost; tohost: .dword 0; .size tohost, 8;    \
-        .align 6; .global fromhost; fromhost: .dword 0; .size fromhost, 8;\
+        .align 4; .global tohost; tohost: .dword 0; .size tohost, 8;    \
+        .align 4; .global fromhost; fromhost: .dword 0; .size fromhost, 8;\
         .popsection;                                                    \
         .align 4; .global begin_signature; begin_signature:
 
