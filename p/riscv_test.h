@@ -203,34 +203,34 @@ handle_exception:                                                       \
         j write_tohost;                                                 \
 reset_vector:                                                           \
         INIT_XREG;                                                      \
-        RISCV_MULTICORE_DISABLE;                                        \
+        /*RISCV_MULTICORE_DISABLE;*/                                        \
         /*INIT_RNMI;*/                                                      \
         /*INIT_SATP;*/                                                      \
         /*INIT_PMP;*/                                                       \
         /*DELEGATE_NO_TRAPS;*/                                              \
         li TESTNUM, 0;                                                  \
-        la t0, trap_vector;                                             \
-        csrw mtvec, t0;                                                 \
+        /*la t0, trap_vector;*/                                             \
+        /*csrw mtvec, t0;*/                                                 \
         CHECK_XLEN;                                                     \
         /* if an stvec_handler is defined, delegate exceptions to it */ \
-        la t0, stvec_handler;                                           \
-        beqz t0, 1f;                                                    \
-        csrw stvec, t0;                                                 \
-        li t0, (1 << CAUSE_LOAD_PAGE_FAULT) |                           \
-               (1 << CAUSE_STORE_PAGE_FAULT) |                          \
-               (1 << CAUSE_FETCH_PAGE_FAULT) |                          \
-               (1 << CAUSE_MISALIGNED_FETCH) |                          \
-               (1 << CAUSE_USER_ECALL) |                                \
-               (1 << CAUSE_BREAKPOINT);                                 \
-        csrw medeleg, t0;                                               \
-1:      csrwi mstatus, 0;                                               \
-        init;                                                           \
-        EXTRA_INIT;                                                     \
-        EXTRA_INIT_TIMER;                                               \
-        la t0, 1f;                                                      \
-        csrw mepc, t0;                                                  \
-        csrr a0, mhartid;                                               \
-        mret;                                                           \
+        /*la t0, stvec_handler;*/                                           \
+        /*beqz t0, 1f;*/                                                    \
+        /*csrw stvec, t0;*/                                                 \
+        /*li t0, (1 << CAUSE_LOAD_PAGE_FAULT) |*/                           \
+        /*       (1 << CAUSE_STORE_PAGE_FAULT) |*/                          \
+        /*       (1 << CAUSE_FETCH_PAGE_FAULT) |*/                          \
+        /*       (1 << CAUSE_MISALIGNED_FETCH) |*/                          \
+        /*       (1 << CAUSE_USER_ECALL) |*/                                \
+        /*       (1 << CAUSE_BREAKPOINT);*/                                 \
+        /*csrw medeleg, t0;*/                                               \
+1:      /*csrwi mstatus, 0;*/                                               \
+        /*init;*/                                                           \
+        /*EXTRA_INIT;*/                                                     \
+        /*EXTRA_INIT_TIMER;*/                                               \
+        /*la t0, 1f;*/                                                      \
+        /*csrw mepc, t0;*/                                                  \
+        /*csrr a0, mhartid;*/                                               \
+        /*mret;*/                                                           \
 1:
 
 //-----------------------------------------------------------------------
@@ -245,21 +245,25 @@ reset_vector:                                                           \
 //-----------------------------------------------------------------------
 
 #define RVTEST_PASS                                                     \
-        fence;                                                          \
-        li TESTNUM, 1;                                                  \
-        li a7, 93;                                                      \
-        li a0, 0;                                                       \
-        ecall
+        /*li TESTNUM, 1;*/                                                  \
+        /*li a7, 93;*/                                                      \
+        /*li a0, 0;*/                                                       \
+        /*ecall*/ \
+        li a0, 1; \
+1:      j 1b
+
 
 #define TESTNUM gp
 #define RVTEST_FAIL                                                     \
-        fence;                                                          \
-1:      beqz TESTNUM, 1b;                                               \
-        sll TESTNUM, TESTNUM, 1;                                        \
-        or TESTNUM, TESTNUM, 1;                                         \
-        li a7, 93;                                                      \
-        addi a0, TESTNUM, 0;                                            \
-        ecall
+        /*fence;*/                                                          \
+/*1:      beqz TESTNUM, 1b;*/                                               \
+        /*sll TESTNUM, TESTNUM, 1;*/                                        \
+        /*or TESTNUM, TESTNUM, 1;  */                                       \
+        /*li a7, 93;*/                                                      \
+        /*addi a0, TESTNUM, 0;*/                                            \
+        /*ecall*/ \
+        li a0, 0; \
+1:      j 1b \
 
 //-----------------------------------------------------------------------
 // Data Section Macro
